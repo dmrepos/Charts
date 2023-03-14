@@ -305,22 +305,6 @@ open class BubbleChartRenderer: BarLineScatterCandleBubbleRenderer
                 width: shapeSize,
                 height: shapeSize)
             
-            let dataArray = entry.data as! [Any]
-                        let cowId = dataArray[5] as! Int
-                        let cowIdString = String(cowId)
-
-                        let valueTextColor = dataSet.valueTextColorAt(0)
-                        let valueFont = UIFont.init(name: dataSet.valueFont.fontName, size: 12)
-
-                        //ChartUtils.drawText(
-                        //    context: context,
-                        //    text: cowIdString,
-                        //    point: CGPoint(
-                        //        x: _pointBuffer.x,
-                        //        y: _pointBuffer.y - shapeHalf),
-                        //    align: .center,
-                        //    attributes: [NSAttributedStringKey.font: valueFont, NSAttributedStringKey.foregroundColor: valueTextColor])
-            
             context.setLineWidth(dataSet.highlightCircleWidth)
             context.setFillColor(color.cgColor)
             context.fillEllipse(in: rect)
