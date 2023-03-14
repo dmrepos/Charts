@@ -112,20 +112,20 @@ open class BubbleChartRenderer: BarLineScatterCandleBubbleRenderer
             let shapeHalf = shapeSize / 2.0
             
             guard
-                viewPortHandler.isInBoundsTop(_pointBuffer.y + shapeHalf),
-                viewPortHandler.isInBoundsBottom(_pointBuffer.y - shapeHalf),
-                viewPortHandler.isInBoundsLeft(_pointBuffer.x + shapeHalf)
+                viewPortHandler.isInBoundsTop(_pointBuffer.y + 10),
+                viewPortHandler.isInBoundsBottom(_pointBuffer.y - 10),
+                viewPortHandler.isInBoundsLeft(_pointBuffer.x + 10)
                 else { continue }
 
-            guard viewPortHandler.isInBoundsRight(_pointBuffer.x - shapeHalf) else { break }
+            guard viewPortHandler.isInBoundsRight(_pointBuffer.x - 10) else { break }
             
             let color = dataSet.color(atIndex: j)
             
             let rect = CGRect(
-                x: _pointBuffer.x - shapeHalf,
-                y: _pointBuffer.y - shapeHalf,
-                width: shapeSize,
-                height: shapeSize
+                x: _pointBuffer.x - 10,
+                y: _pointBuffer.y - 10,
+                width: 20,
+                height: 20
             )
 
             context.setFillColor(color.cgColor)
@@ -205,7 +205,7 @@ open class BubbleChartRenderer: BarLineScatterCandleBubbleRenderer
 
                 // Larger font for larger bubbles?
                 let valueFont = dataSet.valueFont
-                let lineHeight = valueFont.lineHeight
+                let lineHeight = CGFloat.init(20)
 
                 if dataSet.isDrawValuesEnabled
                 {
@@ -214,7 +214,7 @@ open class BubbleChartRenderer: BarLineScatterCandleBubbleRenderer
                         text: text,
                         point: CGPoint(
                             x: pt.x,
-                            y: pt.y - (0.5 * lineHeight)),
+                            y: pt.y - (0.3 * lineHeight)),
                         align: .center,
                         attributes: [NSAttributedString.Key.font: valueFont, NSAttributedString.Key.foregroundColor: valueTextColor])
                 }
@@ -225,7 +225,7 @@ open class BubbleChartRenderer: BarLineScatterCandleBubbleRenderer
                                          image: icon,
                                          x: pt.x + iconsOffset.x,
                                          y: pt.y + iconsOffset.y,
-                                         size: icon.size)
+                                         size: CGSize.init(width: 20, height: 20))
                 }
             }
         }
@@ -277,7 +277,8 @@ open class BubbleChartRenderer: BarLineScatterCandleBubbleRenderer
             _pointBuffer.y = CGFloat(entry.y * phaseY)
             trans.pointValueToPixel(&_pointBuffer)
             
-            let shapeSize = getShapeSize(entrySize: entry.size, maxSize: dataSet.maxSize, reference: referenceSize, normalizeSize: normalizeSize)
+            //let shapeSize = getShapeSize(entrySize: entry.size, maxSize: dataSet.maxSize, reference: referenceSize, normalizeSize: normalizeSize)
+            let shapeSize = CGFloat(10)
             let shapeHalf = shapeSize / 2.0
             
             guard
@@ -304,9 +305,25 @@ open class BubbleChartRenderer: BarLineScatterCandleBubbleRenderer
                 width: shapeSize,
                 height: shapeSize)
             
+            let dataArray = entry.data as! [Any]
+                        let cowId = dataArray[5] as! Int
+                        let cowIdString = String(cowId)
+
+                        let valueTextColor = dataSet.valueTextColorAt(0)
+                        let valueFont = UIFont.init(name: dataSet.valueFont.fontName, size: 12)
+
+                        //ChartUtils.drawText(
+                        //    context: context,
+                        //    text: cowIdString,
+                        //    point: CGPoint(
+                        //        x: _pointBuffer.x,
+                        //        y: _pointBuffer.y - shapeHalf),
+                        //    align: .center,
+                        //    attributes: [NSAttributedStringKey.font: valueFont, NSAttributedStringKey.foregroundColor: valueTextColor])
+            
             context.setLineWidth(dataSet.highlightCircleWidth)
-            context.setStrokeColor(color.cgColor)
-            context.strokeEllipse(in: rect)
+            context.setFillColor(color.cgColor)
+            context.fillEllipse(in: rect)
             
             high.setDraw(x: _pointBuffer.x, y: _pointBuffer.y)
         }
