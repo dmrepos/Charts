@@ -75,6 +75,9 @@ open class PieChartView: PieRadarChartViewBase
     
     /// maximum angle for this pie
     private var _maxAngle: CGFloat = 360.0
+    
+        /// mininum angle for slices
+    private var _minAngleForSlices: CGFloat = 0.0
 
     public override init(frame: CGRect)
     {
@@ -273,6 +276,7 @@ open class PieChartView: PieRadarChartViewBase
     {
         _drawAngles = [CGFloat]()
         _absoluteAngles = [CGFloat]()
+        var minAngles = [CGFloat]()
         
         guard let data = _data else { return }
 
@@ -280,16 +284,32 @@ open class PieChartView: PieRadarChartViewBase
         
         _drawAngles.reserveCapacity(entryCount)
         _absoluteAngles.reserveCapacity(entryCount)
+        minAngles.reserveCapacity(entryCount)
         
         let yValueSum = (_data as! PieChartData).yValueSum
+        let hasMinAngle = _minAngleForSlices != .zero && (CGFloat(entryCount) * _minAngleForSlices) <= _maxAngle
 
         var cnt = 0
+        var offset = 0.0
+        var diff = 0.0
 
         for set in data.dataSets
         {
             for j in 0 ..< set.entryCount
             {
                 guard let e = set.entryForIndex(j) else { continue }
+                let drawAngle = calcAngle(value: abs(e.y), yValueSum: yValueSum)
+                
+                if hasMinAngle {
+                    let temp = drawAngle - _minAngleForSlices
+                    if temp <= 0 {
+                        minAngles.append(_minAngleForSlices)
+                        offset += -temp
+                    } else {
+                        minAngles.append(drawAngle)
+                        diff += temp
+                    }
+                }
                 
                 _drawAngles.append(calcAngle(value: abs(e.y), yValueSum: yValueSum))
 
@@ -303,6 +323,41 @@ open class PieChartView: PieRadarChartViewBase
                 }
 
                 cnt += 1
+            }
+        }
+        if hasMinAngle {
+            for i in 0..<entryCount {
+                minAngles[i] -= (minAngles[i] - _minAngleForSlices) / diff * offset
+                
+                if i == 0 {
+                    _absoluteAngles[0] = minAngles[0]
+                } else {
+                    _absoluteAngles[i] = _absoluteAngles[i - 1] + minAngles[i]
+                }
+            }
+            
+            _drawAngles = minAngles
+        }
+    }
+    
+    /// Minimum angle to draw slices,
+    /// this only works if there is enough space for all slices to have the minimum angel
+    ///
+    /// **default**: 0.0
+    @objc open var minAngleForSlices: CGFloat
+    {
+        get
+        {
+            return _minAngleForSlices
+        }
+        set
+        {
+            _minAngleForSlices = newValue
+            
+            if _minAngleForSlices > (_maxAngle / 2) {
+                _minAngleForSlices = _maxAngle / 2
+            } else if _minAngleForSlices < 0 {
+                _minAngleForSlices = .zero
             }
         }
     }
